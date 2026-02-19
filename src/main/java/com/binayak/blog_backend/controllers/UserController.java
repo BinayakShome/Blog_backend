@@ -37,7 +37,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUserById(@PathVariable("userId") Integer userId) {
         UserDto user = this.userService.getUserById(userId);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return new ResponseEntity<>(user, HttpStatus.FOUND);
     }
 
     @DeleteMapping("/{userId}")

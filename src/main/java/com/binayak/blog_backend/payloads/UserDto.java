@@ -1,11 +1,9 @@
 package com.binayak.blog_backend.payloads;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.NumberFormat;
 
 @NoArgsConstructor
 @Getter
