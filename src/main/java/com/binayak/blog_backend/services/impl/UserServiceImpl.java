@@ -5,8 +5,10 @@ import com.binayak.blog_backend.exception.ResourceNotFoundException;
 import com.binayak.blog_backend.payloads.UserDto;
 import com.binayak.blog_backend.repo.UserRepo;
 import com.binayak.blog_backend.services.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +17,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -29,22 +34,22 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
 
         // Only update if the incoming name is NOT null
-        if(userDto.getName() != null && !userDto.getName().isEmpty()) {
+        if (userDto.getName() != null && !userDto.getName().isEmpty()) {
             user.setName(userDto.getName());
         }
 
         // Only update if the incoming email is NOT null
-        if(userDto.getEmail() != null && !userDto.getEmail().isEmpty()) {
+        if (userDto.getEmail() != null && !userDto.getEmail().isEmpty()) {
             user.setEmail(userDto.getEmail());
         }
 
         // Only update password if provided
-        if(userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
             user.setPassword(userDto.getPassword());
         }
 
         // About can be null, so simple update is fine, or check if you prefer
-        if(userDto.getAbout() != null) {
+        if (userDto.getAbout() != null) {
             user.setAbout(userDto.getAbout());
         }
 
@@ -70,10 +75,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUser() {
-//        List<User> users = new ArrayList<>();
-//        return users.stream()
-//                .map(this::userToDto)
-//                .collect(Collectors.toList());
 
         List<User> users = this.userRepo.findAll();
         List<UserDto> userDto = users.stream().map(user -> this.userToDto(user)).collect(Collectors.toList());
@@ -82,24 +83,19 @@ public class UserServiceImpl implements UserService {
 
     //Later will use mapper class for this
     private User dtoToUser(UserDto dto) {
-        User user = new User();
-        user.setId(dto.getId());
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setNumber(dto.getNumber());
-        user.setPassword(dto.getPassword());
-        user.setAbout(dto.getAbout());
+        User user = this.modelMapper.map(dto, User.class);
         return user;
     }
 
     public UserDto userToDto(User user) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        dto.setNumber(user.getNumber());
-        dto.setPassword(user.getPassword());
-        dto.setAbout(user.getAbout());
+        UserDto dto = this.modelMapper.map(user, UserDto.class);
+
+//        dto.setId(user.getId());
+//        dto.setName(user.getName());
+//        dto.setEmail(user.getEmail());
+//        dto.setNumber(user.getNumber());
+//        dto.setPassword(user.getPassword());
+//        dto.setAbout(user.getAbout());
         return dto;
     }
 }

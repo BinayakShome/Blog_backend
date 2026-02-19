@@ -3,10 +3,12 @@ package com.binayak.blog_backend.controllers;
 import com.binayak.blog_backend.payloads.ApiResponse;
 import com.binayak.blog_backend.payloads.UserDto;
 import com.binayak.blog_backend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -21,7 +23,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto user) {
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
         UserDto newUser = this.userService.createUser(user);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
@@ -45,7 +47,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable("userId") Integer userId, @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> updateUser(@Valid @PathVariable("userId") Integer userId, @RequestBody UserDto userDto) {
         UserDto updatedUser = this.userService.updateUser(userDto, userId);
 
         return ResponseEntity.ok(updatedUser);
