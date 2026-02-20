@@ -5,12 +5,17 @@ import com.binayak.blog_backend.entity.Post;
 import com.binayak.blog_backend.entity.User;
 import com.binayak.blog_backend.exception.ResourceNotFoundException;
 import com.binayak.blog_backend.payloads.PostDto;
+import com.binayak.blog_backend.payloads.PostResponse;
 import com.binayak.blog_backend.repo.CategoryRepo;
 import com.binayak.blog_backend.repo.PostRepo;
 import com.binayak.blog_backend.repo.UserRepo;
 import com.binayak.blog_backend.services.PostService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -53,8 +58,7 @@ public class PostImpl implements PostService {
     @Override
     public PostDto updatePost(PostDto postDto, Integer post_id) {
         // 1. Find the existing post
-        Post post = this.postRepo.findById(post_id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "post id", post_id));
+        Post post = this.postRepo.findById(post_id).orElseThrow(() -> new ResourceNotFoundException("Post", "post id", post_id));
 
         // 2. Update title ONLY if Postman actually sent a new one
         if (postDto.getTitle() != null && !postDto.getTitle().trim().isEmpty()) {
@@ -80,16 +84,33 @@ public class PostImpl implements PostService {
 
     @Override
     public void deletePost(Integer post_id) {
-        Post post = this.postRepo.findById(post_id).orElseThrow(()-> new ResourceNotFoundException("Post", "post_id", post_id));
+        Post post = this.postRepo.findById(post_id).orElseThrow(() -> new ResourceNotFoundException("Post", "post_id", post_id));
         postRepo.delete(post);
     }
 
     @Override
-    public List<PostDto> getAllPost() {
-        List<Post> allPosts = this.postRepo.findAll();
+    public PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable page = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Post> pagePost = this.postRepo.findAll(page);
+        List<Post> allPosts = pagePost.getContent();
+
         List<PostDto> posts = allPosts.stream().map((post -> this.modelMapper.map(post, PostDto.class))).collect(Collectors.toList());
 
-        return posts;
+        PostResponse postResponse = new PostResponse();
+        postResponse.setContent(posts);
+        postResponse.setPageNumber(pagePost.getNumber());
+        postResponse.setPageSize(pagePost.getSize());
+        postResponse.setLastPage(pagePost.isLast());
+        postResponse.setTotalElements(pagePost.getNumberOfElements());
+        postResponse.setTotalPages(pagePost.getTotalPages());
+
+        return postResponse;
     }
 
     @Override
@@ -100,25 +121,60 @@ public class PostImpl implements PostService {
     }
 
     @Override
-    public List<PostDto> getPostByUser(Integer user_id) {
-        User user = this.userRepo.findById(user_id).orElseThrow(() -> new ResourceNotFoundException("User", "id", user_id));
-        List<Post> allPosts = this.postRepo.findByUser(user);
+    public PostResponse getPostByUser(Integer user_id, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
-        return allPosts.stream().map((posts -> this.modelMapper.map(posts, PostDto.class))).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        User user = this.userRepo.findById(user_id).orElseThrow(() -> new ResourceNotFoundException("User", "id", user_id));
+        Page<Post> pagePost = this.postRepo.findByUser(user, pageable);
+
+        List<Post> allPosts = pagePost.getContent();
+        List<PostDto> postDtos = allPosts.stream().map(posts -> this.modelMapper.map(posts, PostDto.class)).collect(Collectors.toList());
+
+        PostResponse postResponse = new PostResponse();
+        postResponse.setContent(postDtos);
+
+        postResponse.setPageNumber(pagePost.getNumber());
+        postResponse.setPageSize(pagePost.getSize());
+        postResponse.setTotalElements(pagePost.getTotalElements());
+        postResponse.setTotalPages(pagePost.getTotalPages());
+        postResponse.setLastPage(pagePost.isLast());
+
+        return postResponse;
     }
 
     @Override
-    public List<PostDto> getPostByCategory(Integer category_id) {
+    public PostResponse getPostByCategory(Integer category_id, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
         Category category = this.categoryRepo.findById(category_id).orElseThrow(() -> new ResourceNotFoundException("Category", "id", category_id));
 
-        List<Post> allPosts = this.postRepo.findByCategory(category);
+        Page<Post> allPosts = this.postRepo.findByCategory(category, pageable);
         List<PostDto> postsByCategory = allPosts.stream().map((posts -> this.modelMapper.map(posts, PostDto.class))).collect(Collectors.toList());
 
-        return postsByCategory;
+        PostResponse postResponse = new PostResponse();
+        postResponse.setContent(postsByCategory);
+
+        postResponse.setPageNumber(allPosts.getNumber());
+        postResponse.setPageSize(allPosts.getSize());
+        postResponse.setTotalElements(allPosts.getTotalElements());
+        postResponse.setTotalPages(allPosts.getTotalPages());
+        postResponse.setLastPage(allPosts.isLast());
+
+        return postResponse;
     }
 
     @Override
-    public List<PostDto> searchPost(String keyword) {
-        return List.of();
+    public PostResponse searchPost(String keyword, Integer pageNumber, Integer pageSize) {
+        return null;
     }
+
 }

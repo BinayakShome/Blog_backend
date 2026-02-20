@@ -2,6 +2,7 @@ package com.binayak.blog_backend.controllers;
 
 import com.binayak.blog_backend.payloads.ApiResponse;
 import com.binayak.blog_backend.payloads.PostDto;
+import com.binayak.blog_backend.payloads.PostResponse;
 import com.binayak.blog_backend.services.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,23 +30,39 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}/posts")
-    public ResponseEntity<List<PostDto>> getAllPostsByUser(@PathVariable("userId") Integer userId) {
+    public ResponseEntity<PostResponse> getAllPostsByUser(
+            @PathVariable("userId") Integer userId,
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "uploadDate", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "desc", required = false) String sortDir
+    ) {
 
-        List<PostDto> getPosts = this.postService.getPostByUser(userId);
+        PostResponse getPosts = this.postService.getPostByUser(userId, pageNumber, pageSize, sortBy, sortDir);
         return new ResponseEntity<>(getPosts, HttpStatus.FOUND);
     }
 
     @GetMapping("/category/{categoryId}/posts")
-    public ResponseEntity<List<PostDto>> getAllPostsByCategory(@PathVariable("categoryId") Integer categoryId) {
-
-        List<PostDto> getPosts = this.postService.getPostByCategory(categoryId);
+    public ResponseEntity<PostResponse> getAllPostsByCategory(
+            @PathVariable("categoryId") Integer categoryId,
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "uploadDate", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "desc", required = false) String sortDir
+    ) {
+        PostResponse getPosts = this.postService.getPostByCategory(categoryId, pageNumber, pageSize, sortBy, sortDir);
         return new ResponseEntity<>(getPosts, HttpStatus.FOUND);
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<List<PostDto>> getAllPosts() {
+    public ResponseEntity<PostResponse> getAllPosts(
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "uploadDate", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "desc", required = false) String sortDir
+    ) {
 
-        List<PostDto> getPosts = this.postService.getAllPost();
+        PostResponse getPosts = this.postService.getAllPost(pageNumber, pageSize, sortBy, sortDir);
         return new ResponseEntity<>(getPosts, HttpStatus.FOUND);
     }
 

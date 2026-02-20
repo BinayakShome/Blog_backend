@@ -1,9 +1,8 @@
 package com.binayak.blog_backend.services;
 
 import com.binayak.blog_backend.payloads.PostDto;
+import com.binayak.blog_backend.payloads.PostResponse;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public interface PostService {
@@ -13,13 +12,14 @@ public interface PostService {
 
     void deletePost(Integer post_id);
 
-    List<PostDto> getAllPost();
+    PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
 
     PostDto getPostById(Integer post_id);
 
-    List<PostDto> getPostByUser(Integer user_id);
+    PostResponse getPostByUser(Integer user_id, Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
 
-    List<PostDto> getPostByCategory(Integer category_id);
+    PostResponse getPostByCategory(Integer category_id, Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
 
-    List<PostDto> searchPost(String keyword);
+    PostResponse searchPost(String keyword, Integer pageNumber, Integer pageSize);
+
 }
