@@ -20,6 +20,6 @@ public interface PostService {
 
     PostResponse getPostByCategory(Integer category_id, Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
 
-    PostResponse searchPost(String keyword, Integer pageNumber, Integer pageSize);
+    PostResponse searchPost(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
 
 }

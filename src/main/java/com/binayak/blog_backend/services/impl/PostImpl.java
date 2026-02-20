@@ -173,8 +173,28 @@ public class PostImpl implements PostService {
     }
 
     @Override
-    public PostResponse searchPost(String keyword, Integer pageNumber, Integer pageSize) {
-        return null;
+    public PostResponse searchPost(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Post> filterPosts = this.postRepo.findByTitleContainingIgnoreCase(keyword, pageable);
+        List<PostDto> filtered = filterPosts.stream().map(posts -> this.modelMapper.map(posts, PostDto.class)).collect(Collectors.toList());
+
+        PostResponse postResponse = new PostResponse();
+
+        postResponse.setContent(filtered);
+
+        postResponse.setPageNumber(filterPosts.getNumber());
+        postResponse.setPageSize(filterPosts.getSize());
+        postResponse.setTotalElements(filterPosts.getTotalElements());
+        postResponse.setTotalPages(filterPosts.getTotalPages());
+        postResponse.setLastPage(filterPosts.isLast());
+
+        return postResponse;
     }
 
 }
